@@ -25,17 +25,18 @@ class JobListener extends BaseConsumer
     public function process(NsqMessage $msg, $bev)
     {
         $payload = json_decode($msg->payload, true);
-        $this->info('Message received: '.json_encode($msg));
-        logger()->info('message received', [
+        $this->info("Message received\n". json_encode([
             'payload' => $payload,
             'messageId' => $msg->messageId,
             'timestamp' => $msg->timestamp,
             'attempts' => $msg->attempts,
-        ]);
+        ], JSON_PRETTY_PRINT)."\n");
+
+        throw new \Exception('Unprocessable message');
     }
 
     public function getTopic(): string
     {
-        return 'some-test-queue';
+        return 'inspires';
     }
 }

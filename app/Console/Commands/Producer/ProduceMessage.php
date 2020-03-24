@@ -8,6 +8,7 @@ use Nsq;
 use NsqLookupd;
 use NsqMessage;
 use NsqException;
+use Illuminate\Foundation\Inspiring;
 
 class ProduceMessage extends Command
 {
@@ -16,7 +17,7 @@ class ProduceMessage extends Command
      *
      * @var string
      */
-    protected $signature = 'produce:message {--count=}';
+    protected $signature = 'produce:message {count}';
 
     /**
      * Execute the console command.
@@ -25,11 +26,6 @@ class ProduceMessage extends Command
      */
     public function handle()
     {
-        $message = [
-            'id' => time(),
-            'message' => 'Olala',
-        ];
-
         $nsqdAddr = [
             "nsqd:4150"
         ];
@@ -42,9 +38,13 @@ class ProduceMessage extends Command
 
         $nsq->connectNsqd($nsqdAddr);
 
-        for ($i = 0; $i < $this->option('count') ?? 1; $i++) {
+        for ($i = 0; $i < $this->argument('count') ?? 1; $i++) {
+            $message = [
+                'id' => $i,
+                'quotes' => Inspiring::quote(),
+            ];
             $nsq->publish(
-                'some-test-queue',
+                'inspires',
                 json_encode($message)
             );
         }
