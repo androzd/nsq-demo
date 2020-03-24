@@ -12,7 +12,7 @@ abstract class BaseConsumer extends Command
 {
     public function handle()
     {
-        $nsqLookupd = new NsqLookupd("127.0.0.1:4161"); //the nsqlookupd http addr
+        $nsqLookupd = new NsqLookupd("nsqlookupd:4161"); //the nsqlookupd http addr
 
         $nsq = new Nsq(
             [

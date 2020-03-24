@@ -16,7 +16,7 @@ class ProduceMessage extends Command
      *
      * @var string
      */
-    protected $signature = 'produce:message';
+    protected $signature = 'produce:message {--count=}';
 
     /**
      * Execute the console command.
@@ -31,7 +31,7 @@ class ProduceMessage extends Command
         ];
 
         $nsqdAddr = [
-            "127.0.0.1:4150"
+            "nsqd:4150"
         ];
 
         $nsq = new Nsq(
@@ -42,7 +42,7 @@ class ProduceMessage extends Command
 
         $nsq->connectNsqd($nsqdAddr);
 
-        for ($i = 0; $i < 10000; $i++) {
+        for ($i = 0; $i < $this->option('count') ?? 1; $i++) {
             $nsq->publish(
                 'some-test-queue',
                 json_encode($message)

@@ -8,14 +8,14 @@ use NsqLookupd;
 use NsqMessage;
 use NsqException;
 
-class JobNotifications extends BaseConsumer
+class JobListener extends BaseConsumer
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'job:notifications';
+    protected $signature = 'job:listen';
 
     /**
      * Execute the console command.
