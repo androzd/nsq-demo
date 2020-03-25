@@ -17,7 +17,7 @@ class ProduceMessage extends Command
      *
      * @var string
      */
-    protected $signature = 'produce:message {count}';
+    protected $signature = 'produce:message {count} {--deferred}';
 
     /**
      * Execute the console command.
@@ -43,10 +43,18 @@ class ProduceMessage extends Command
                 'id' => $i,
                 'quotes' => Inspiring::quote(),
             ];
-            $nsq->publish(
-                'inspires',
-                json_encode($message)
-            );
+            if ($this->option('deferred')) {
+                $nsq->deferredPublish(
+                    'inspires',
+                    json_encode($message),
+                    10000
+                );
+            } else {
+                $nsq->publish(
+                    'inspires',
+                    json_encode($message)
+                );
+            }
         }
         $nsq->closeNsqdConnection();
     }

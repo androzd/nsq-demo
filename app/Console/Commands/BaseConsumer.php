@@ -10,11 +10,14 @@ use NsqException;
 
 abstract class BaseConsumer extends Command
 {
+    /** @var Nsq */
+    protected $nsqConsumer;
+    protected $nsqProducer;
     public function handle()
     {
         $nsqLookupd = new NsqLookupd("nsqlookupd:4161"); //the nsqlookupd http addr
 
-        $nsq = new Nsq(
+        $this->nsqConsumer = new Nsq(
             [
                 'channel' => 'web',
             ]
@@ -28,10 +31,11 @@ abstract class BaseConsumer extends Command
             'auto_finish' => true, //default true
         ];
 
-        $nsq->subscribe(
+        $method = env('USE_FAILOVER', false) ? 'processWithFailover' : 'process';
+        $this->nsqConsumer->subscribe(
             $nsqLookupd,
             $config,
-            [$this, 'process']
+            [$this, $method]
         );
     }
 
@@ -42,5 +46,26 @@ abstract class BaseConsumer extends Command
         return 'web';
     }
 
+    public function processWithFailover(NsqMessage $nsqMessage, $bev) {
+        try {
+            $this->process(...func_get_args());
+        }
+        catch (\Exception $ex) {
+            if (!$this->nsqProducer) {
+                $nsqdAddr = [
+                    "nsqd:4150"
+                ];
+
+                $this->nsqProducer = new Nsq(
+                    [
+                        'channel' => 'web',
+                    ]
+                );
+
+                $this->nsqProducer->connectNsqd($nsqdAddr);
+            }
+            $this->nsqProducer->publish('failover', json_encode($nsqMessage));
+        }
+    }
     abstract public function process(NsqMessage $nsqMessage, $bev);
 }

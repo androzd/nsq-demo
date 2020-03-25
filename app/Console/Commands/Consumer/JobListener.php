@@ -15,7 +15,7 @@ class JobListener extends BaseConsumer
      *
      * @var string
      */
-    protected $signature = 'job:listen';
+    protected $signature = 'job:listen {--exception}';
 
     /**
      * Execute the console command.
@@ -32,7 +32,9 @@ class JobListener extends BaseConsumer
             'attempts' => $msg->attempts,
         ], JSON_PRETTY_PRINT)."\n");
 
-        throw new \Exception('Unprocessable message');
+        if ($this->option('exception')) {
+            throw new \Exception('Unprocessable message');
+        }
     }
 
     public function getTopic(): string
